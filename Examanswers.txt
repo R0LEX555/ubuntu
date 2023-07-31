@@ -1,0 +1,960 @@
+
+Exam Questions
+
+Web Server
+
+1) What is apache and why it is required?
+>> Apache HTTP server is free and open source server which required to delivers web content through internet.
+2) What is the location of apache logs?
+>>Path is : /usr/local/apache/logs/
+3) What is the location of apache configuration file?
+>>Path is : /etc/apache2/conf/httpd.conf
+4) How to configure domain in apache?
+>> To configure domain in apache follow below steps :
+Cd /var/www
+Mkdir   -p domain.com/public_html
+Chown –R apache.apache /var/www/domain.com/public_html
+Chmod –R 755 /var/www
+
+Create virtual host :
+<VirtualHost *:80>
+    ServerName www. domain.com
+    ServerAlias yourdomain.com
+    DocumentRoot /var/www/domain.com/public_html
+    ErrorLog /var/www/domain.com/error.log
+    CustomLog /var/www/domain.com/requests.log combined
+</VirtualHost>
+
+Check apache configuration using command :apachectl –t
+If syntax is ok restart apache using command to apply changes : service httpd restart
+
+5) How to check connections on apache ports?
+>>netstat -an | grep :80
+
+6) How to configure proxy for NodeJs/Python in apache ?
+Vi /usr/local/apache/conf/httpd.conf
+Searche the domain name
+Uncomment # includeline
+Copy #include line
+Include "/etc/apache2/conf.d/userdata/std/2_4/uhcmpbvi/carronrent.com
+mkdir -p /etc/apache2/conf.d/userdata/ssl/2_4/uhcmpbvi/carronrent.com/
+mkdir -p /etc/apache2/conf.d/userdata/std/2_4/uhcmpbvi/carronrent.com/
+cd /etc/apache2/conf.d/userdata/std/2_4/uhcmpbvi/carronrent.com/
+vi proxy.conf
+
+# This is for normal requests
+<Location /test/>
+ProxyPass http://127.0.0.1:port no/
+ProxyPassReverse http://127.0.0.1:Port no/
+</Location>
+save and exit file
+cd /etc/apache2/conf.d/userdata/ssl/2_4/uhcmpbvi/carronrent.com/
+vi proxy.conf
+
+SSLProxyEngine On
+ProxyPreserveHost On
+ProxyRequests Off
+# This is for normal requests
+<Location /test/>
+ProxyPass http://127.0.0.1:port no/
+ProxyPassReverse http://127.0.0.1:Port no/
+</Location>
+save and exit file
+Run the application.Apachectl –t
+Service httpd restart
+Run the application
+
+7) How to check apache service status?
+>> Service apache status
+
+8) What are the different error codes of apache and meaning of those codes?
+400-499 = Request is incomplete for some reason.
+400 = Bad Request — there is a syntax error in the request, and it is denied.
+401 = The request header did not contain the necessary authentication codes, and the client is denied access.
+402 = Payment is required. This code is not yet in operation.
+403 = Forbidden — the client is not allowed to see a certain file. This is also returned at times when the server doesn't want any more visitors.
+404 = Document not found — the requested file was not found on the server. Possibly because it was deleted, or never existed before. Often caused by misspellings of URLs.
+405 = The method you are using to access the file is not allowed.
+406 = The requested file exists but cannot be used as the client system doesn't understand the format the file is configured for.
+407 = The request must be authorised before it can take place.
+408 = Request Timeout — the server took longer than its allowed time to process the request. Often caused by heavy net traffic.
+
+500 = Internal Server Error — nasty response that is usually caused by a problem in your Perl code when a CGI program is run.
+501 = The request cannot be carried out by the server.
+502 = Bad Gateway — the server you're trying to reach is sending back errors.
+503 = Temporarily Unavailable — the service or file that is being requested is not currently available.
+504 = The gateway has timed out. Like the 408 timeout error, but this one occurs at the gateway of the server.
+505 = The HTTP protocol you are asking for is not supported.
+
+9) How to check apache version?
+= httpd -v / OR  /usr/local/apache/bin/httpd -v
+
+10) How to check apache modules?
+= apachectl -M
+>>httpd –M
+
+11) How to install apache server and modules?
+>> To install apache/httpd server follow below steps :
+Yum update
+Yum install httpd
+firewall-cmd --permanent --add-service=http
+firewall-cmd --permanent --add-service=https
+systemctl start httpd
+systemctl enable httpd
+systemctl status httpd
+
+12) What is Nginx and why it is required?
+>> NGINX is open source software for web serving, reverse proxying, caching, load balancing, media streaming, and more.
+13) What is the location of Nginx logs?
+>> /var/log/nginx/access.log 
+14) What is the location of Nginx configuration file?
+>> /etc/nginx/nginx.conf
+15) How to configure domain in Nginx?
+
+sudo apt-get update
+sudo apt-get install nginx
+sudomkdir -p /var/www/example.com/html
+sudochown -R USER:USER /var/www/example.com/html
+sudochmod -R 755 /var/www
+sudo cp /etc/nginx/sites-available/default /etc/nginx/sites-available/example.com
+sudo nano /etc/nginx/sites-available/example.com
+root /var/www/example.com/html;
+server_name example.com www.example.com;
+sudo ln -s /etc/nginx/sites-available/example.com /etc/nginx/sites-enabled/
+sudo rm /etc/nginx/sites-enabled/default
+sudo nano /etc/nginx/nginx.conf
+uncomment server_names_hash_bucket_size 64;
+sudo service nginx restart
+sudo nano /etc/hosts
+127.0.0.1   localhost
+127.0.0.1   guest-desktop
+111.111.111.111 example.com
+
+vi /etc/nginx/sites-available/domain-one.com.conf
+Add this code :
+server {	
+     listen 80;
+     listen [::]:80;
+server_name domain-one.com www.domain-one.com;
+}
+root /var/www/domain-one.com/public_html;
+index index.html index.htm;
+location / {
+try_files $uri $uri/ =404;
+}
+Validate the configuration :
+nginx –t
+
+16)  How to check connections on Nginx ports?
+netstat -an | grep :80
+
+17) How to configure proxy for NodeJs/Python in Nginx ?
+cd /etc/nginx/sites-available
+vi myserver.config
+add this porxycode :
+server{
+    listen 80;
+server_namewach.quest;
+    location / {
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_set_header Host $host;
+proxy_passhttp://127.0.0.1:3000;
+proxy_http_version 1.1;
+proxy_set_header Upgrade $http_upgrade;
+proxy_set_header Connection "upgrade";
+        # location /overview {
+        #     proxy_passhttp://127.0.0.1:3000$request_uri;
+        #     proxy_redirect off;
+        # }
+    }
+}
+
+Check syntax : nginx -t
+service nginx restart
+
+18) How to check Nginx service status?
+>> service nginx status
+
+19) What are the different error codes of Nginx and meaning of those codes?
+https://www.nginx.com/resources/wiki/extending/api/http/
+
+20) How to check Nginx version?
+>>nginx -v
+21) How to check Nginx modules?
+>>nginx -V
+22) How to install Nginx server and modules?
+ 
+ 
+ 
+23) What is IIS and why it is required?
+>> Internet Information Services (IIS) Internet Information Services (IIS) is a flexible, general-purpose web server from Microsoft that runs on Windows systems to serve requested HTML pages or files. An IIS web server accepts requests from remote client computers and returns the appropriate response.
+     What are IIS features?
+•	Image result
+•	Features
+•	Anonymous authentication.
+•	Basic access authentication.
+•	Digest access authentication.
+•	Integrated Windows Authentication.
+•	UNC authentication.
+•	. NET Passport Authentication (Removed in Windows Server 2008 and IIS 7.0)
+•	Certificate authentication.
+
+24) What is the location of IIS logs?
+= C:\inetpub\logs\LogFiles\W3SVC1
+
+25) What is the location of IIS configuration file?
+= C:\Windows\System32\inetsrv\Config
+The primary configuration files are:
+ApplicationHost.config- This configuration file stores the settings for all your Web sites and applications.
+Administration.config- This configuration file stores the settings for IIS management. These settings include the list of management modules that are installed for the IIS Manager tool, as well as configuration settings for management modules.
+Redirection.config- IIS 7 and later support the management of several IIS servers from a single, centralized configuration file. This configuration file contains the settings that indicate the location where the centralized configuration files are stored.
+
+26) How to configure domain in IIS?
+Open IIS from RDP
+1. Click on the Windows icon on the desktop and then click on Control Panel.
+2. Under Adjust your computer’s settings, click on System and Security. Next click on Administrative Tools and double-click on Internet Information Services (IIS) Manager.
+3. Double-click on your server name, go to Sites and from the top-right hand-side corner, under Actions click on Add Website.
+4. An Add Website window >> Enter site name , physical path , Binding , port =80 >> click OK
+Enter your domain name.
+Set the Physical path by browsing the site file that usually lies in inetpub folder.
+Select the Type and IP address fields to use for this website, set TCP Port = 80, Hostname, leave it blank if this is dedicated IP otherwise enter “www.yourdomain.com”.
+5. For testing your website, right click on your domain -> Manage Website -> Browse. Your website will get displayed.
+
+27) How to check connections on IIS ports?
+>>
+28) How to check IIS service status?
+sc query type= service state= all | find "IIS Admin Service"
+
+29) What are the different error codes of IIS and meaning of those codes?
+>> “500 Internal Server Error” or “HTTP Error 500” :most common issue is permission issue 
+>>“Error 500.19” or “500.19 Internal Server Error”: The error 500.19 is an internal server error often occurring on a server using Microsoft IIS software. It indicates that the configuration data for the page is invalid.
+HTTP Error 503. The Service is unavailable.” : The IIS error 503 is a server error may occur when you try to connect to a web application. “Error 503 - The service is unavailable” usually occurs if the application pool associated with the web application you are trying to connect to fails to start. This may have been caused by an overload or ongoing maintenance.
+
+“Error 403” or “403 Forbidden”: The error 403 Forbidden usually occurs when you are trying to access a directory or page that you do not have permission to access. 
+“HTTP 404 – File not found” : The 404 error message occurs when the web server is unable to retrieve the requested page. 
+“Error 401: Access Denied” or “Error 401: Unauthorized” : If you receive error 401 by your IIS, you are facing authentication problems. The error occurs when the authentication to the admin or helpdesk portal fails due to a misconfiguration of authentication settings.
+
+30) How to check IIS version?
+Just go to the Control Panel and Select Administrative Tools. Open Internet Information Service Manager. Go to Help and Select About Internet  Information Services. The following window will appear which contains the version number of Internet Information Services
+
+31) How to check IIS modules?
+>> Open Server Manager > Roles and select Web Server (IIS). Check all features under Web Server.
+32) How to install IIS server and modules?
+1.	On the Start page, click the Server Manager tile, and then click OK.
+2.	In Server Manager, select Dashboard, and click Add roles and features.
+3.	In the Add Roles and Features Wizard, on the Before you begin page, click Next.
+4.	On the Select installation type page, select Role-based or feature-based installation, and click Next.
+5.	On the Select destination server page, select Select a server from the server pool, select your server, and click Next.
+6.	On the Select server roles page, select Web Server (IIS), and click Next.
+7.	On the Select features page, click Next.
+8.	On the Web Server Role (IIS) page, click Next.
+9.	On the Select role services page, note the preselected role services that are installed by default, expand the Application Development node, and then select ASP.NET 4.5. (If you installed .NET 3.5, select ASP.NET 3.5 also.)
+10.	On the Summary of Features to Install page, confirm your selections, and then click Install.
+11.	In the Add features that are required for ASP.NET 4.5? box, click Add Features. The following additional features are added:
+•	.NET Extensibility 4.5
+•	ISAPI Extensions
+•	ISAPI Filters
+•	.NET Extensibility 3.5 (If ASP.NET 3.5 was selected)
+	Click Next.
+	On the Confirm installation selections page, click Install.
+	On the Installation progress page, confirm that your installation of the Web Server (IIS) role and required role services completed successfully, and then click Close.
+	To verify that IIS installed successfully, type the following into a web browser:
+http://localhost
+The default IIS Welcome page is displayed
+
+How to enable debugging logs for clients?
+Launch Event Viewer. Select View\Show Analytic and Debug Logs
+
+
+EXIM:
+
+33) What is exim and use of exim?
+>> Exim is a mail transfer agent and its used to deal with routing, receiving and delivering of emails.
+34) How to check exim logs and log file location?
+>> /var/log/exim_mainlog | grep emailid | grep “date”
+/var/log/exim/maillog
+35) What is the location of exim configuration file ?
+>> /etc/exim.conf
+36) How to check email queue?
+>>exim -bpc : Count the no. of mails in queue
+exim -bp :  list the mails in queue
+
+37) Command to check or find out spamming on the server.
+grep 'cwd=' /var/log/exim_mainlog | awk '{print $3}' | cut -d= -f2 | sort | uniq -c | sort -n
+
+cat /var/log/exim_mainlog | grep esmtpa | awk '{print $5}' | sort | uniq -c | sort -n
+
+cat /var/spool/exim/input// | grep "auth_id" | awk '{print $2}' | sort | uniq -c | sort -n
+
+38) What is the difference between Bulk and spam emails?
+>> Whereas spam is a constant threat, bulk email is often one-time advertisements or marketing messages
+39) How to troubleshoot if emails are not being sent from the server?
+>> First check if Mx record of domain is pointing to our server.
+>> If its pointing to our server , check the error and troubleshoot accordingly , else if Mx is remote then select email routing to remote and ask customer to try.
+>> For Mx pointing to local server verify if email delivery set to local .
+>> Check logs from /var/log/exim_mainlog
+40) Email delivery: Will give you examples in exam.
+41) Bounce Back understanding:  We will provide you bounced back in exam.
+42) What are the DNS records required for the emails?
+MX record,SPF,DKIM,DMARC,PTR
+43) How to check exim service status?
+service exim status
+44) What is MailEnable and use of MailEnable?
+>> A mailbox is a repository for email. It is used to store emails for one or more email addresses. 
+45) How to check MailEnable logs and log file location?
+>> C:\Program Files\Mail Enable\Logging\SMTP
+C:\Program Files\Mail Enable\Logging\
+46) What is the location of MailEnable configuration file ?
+>> C:\Program Files (x86)\Mail Enable\Config\ADDRESS-MAP.TAB
+47) How to check email queue?
+Login to RDP >> Open Mail Enable >> Servers >> localhost >> Services and connetctors>> SMTP >> Queues
+
+48) Command to check or find out spamming on the server.
+
+49) What is the difference between Bulk and spam emails?
+
+50) How to troubleshoot if emails are not being sent from the server?
+51) Email delivery:  Will give you examples in exam.
+52) Bounce Back understanding: We will provide you bounced back in exam.
+53) What are the DNS records required for the emails?
+MX 
+54) How to check MailEnable service status?
+>> From Plesk Service Monitor.
+
+DNS:
+
+55) List type of DNS records and their usage
+1. A record
+The main use of A record is for IP address lookup. Using an A record, a web browser is able to load a website using the domain name. As a result, we can access websites on the internet without knowing their IP addresses.
+2. AAAA record
+AAAA record, just like A record, point to the IP address for a domain. However, this DNS record type is different in the sense that it points to IPV6 addresses.
+3. CNAME record
+In a CNAME record, the alias doesn't point to an IP address. And the domain name that the alias points to is the canonical name.
+4. NS record
+A nameserver (NS) record specifies the authoritative DNS server for a domain. In other words, the NS record helps point to where internet applications like a web browser can find the IP address for a domain name. Usually, multiple nameservers are specified for a domain. 
+56) How to check DNS records for a domain?
+>> Use sites like intodns or DNS watch.
+You can use dig or nslookup commands
+
+57) How to check DNS service status?
+>> service pdns status
+      Service named status
+
+58) Explain usage of dig/nslookup with example
+>> Dig Hostname =  dig domainname.com
+		dig domainname.com MX
+		          dig domainname.com anyrecord
+		          dig -x IP
+nslookup = nslookup abc.com
+	nslookup IP >> returns reverse dns
+	nslookup -type=ns domainname.com
+
+59) What are DNS resolvers and use of resolvers?
+>> It is a server on the internet that converts domain name to IP address.
+
+
+
+Database server:
+
+60) What is MySQL and use of Mysql
+>>It is a database management system which is used to manage database on the server.
+
+61) How to install Mysql service.
+>>https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-centos-7
+
+62) What is the path of Mysql configuration file?
+>> /etc/my.cnf
+
+63) How to check mysql error logs?
+>>
+
+64) List different types of engines in Mysql.
+>>Innodb ,MyISAM , Memory , CSV,Merge
+
+65) How to restart/start/stop Mysql service
+>>  servicemysqld status
+     service mysqld start
+     service mysqld restart
+     service mysqld stop
+
+66) How to kill specific query in Mysql?
+>>mysql
+Mysql> show processlist
+	Mysql>kill pid
+67) How to take backup and restore Mysql database?
+>>mysqldumpdatabasename>databasename.sql
+Mysqldatabasename<databasename.sql
+
+68) How to install Mysql web client?
+>>
+69) How to secure Mysql on server?
+>>https://www.unixmen.com/how-to-configure-connections-mysql-centos-7/
+
+70) How to check mysql service status?
+
+71) How to troubleshoot if mysql service is down?
+>> First check mysql error logs
+    Then check if any query is running.
+Mysql
+Mysql>> show processlist;
+   Observer the process time and if any slow query is running kill it.
+    Kill pid;
+
+72) How to enable remote connection for Mysql?
+https://www.cyberciti.biz/tips/how-do-i-enable-remote-access-to-mysql-database-server.html
+
+73) How to troubleshoot if Mysql remote connection is not working?
+https://serverfault.com/questions/377303/centos-not-allowing-remote-mysql-connections
+
+74) How to add user in Mysql and assign password?
+https://www.hostinger.in/tutorials/mysql/how-create-mysql-user-and-grant-permissions-command-line
+
+75) How to reset root user password in Mysql?
+>>mysql
+>> flush previleges;
+>> alter user ‘root’@’localhost’ identified ny ‘newpassword’
+76) How to check/repair database in Mysql?
+>>mysqlcheck -r dbname
+https://phoenixnap.com/kb/mysql-repair-database
+
+77) What is MSSQL and use of MSSQL ?
+Microsoft SQL Server is a relational database management system (RDBMS) that supports a wide variety of transaction processing, business intelligence and analytics applications in corporate IT environments.
+78) How to install MSSQL service?
+MSSQL Express Setup 
+https://www.microsoft.com/en-in/sql-server/sql-server-downloads
+download sql server from above link
+
+download a free specialised edition > Express
+open setup file > run > select Custom > Install > new sql server
+
+sql server setup window will popup 
+accept term and next
+next
+next
+database engine congfiguration> select mixed authentication mode > entre billing password
+accept and next
+
+79) What is the path of MSSQL configuration files?
+C:\Program Files\Microsoft SQL Server\
+
+80) How to check MSSQL error logs?
+In SQL Server Management Studio, select Object Explorer. To open Object Explorer, select F8. Or on the top menu, select View, and then select Object Explorer:
+1.	In Object Explorer, connect to an instance of SQL Server, and then expand that instance.
+2.	Find and expand the Management section (assuming you have permissions to see it).
+3.	Right-click SQL Server Logs, select View, and then choose SQL Server Log.
+
+81) How to restart/start/stop MSSQL service ?
+Open plesk service monitor >> tick the checkbox and click the buttons as per your request to start, restart and stop service.
+
+82) How to kill specific query in MSSQL ?
+
+First execute the below command:
+sp_who2
+After that execute the below command with SPID, which you got from above command:
+KILL {SPID value}
+
+83) How to take backup and restore MSSQL database?
+To take a backup of your database, follow these steps:
+1.	Launch SQL Server Management Studio (SSMS) and connect to your SQL Server instance.
+2.	Expand the Databases node in Object Explorer.
+3.	Right-click the database, hover over Tasks, and select Back up....
+4.	Under Destination, confirm that the path for your backup is correct. If you need to change the path, select Remove to remove the existing path, and then Add to type in a new path. You can use the ellipses to navigate to a specific file.
+5.	Select OK to take a backup of your database.
+To restore your database, follow these steps:
+1.	Launch SQL Server Management Studio (SSMS) and connect to your SQL Server instance.
+2.	Right-click the Databases node in Object Explorer and select Restore Database....
+
+84) How to install MSSQL web client?
+SSMS installation
+
+85) How to secure MSSQL on server?
+
+86) How to check MSSQL service status?
+87) How to troubleshoot if MSSQL service is down?
+88) How to enable remote connection for MSSQL?
+Verify if 1433 port is allowed in firewall for remote connections.
+Check from plesk tools & settings > firewall.
+3.	From RDP check if 1433 firewall rule is enabled or not from start >> Panel >>windows firewall
+4.	Under SQL service network configuration select protocol for <Your server name>
+5.	Make sure that TCP/IP protocol is enabled and right click on TCP/IP select Properties option 
+6.	In the properties dialogue select IP address tab & scroll down to IPALL.
+7.	If the TCP dynamic port dialogue box contain
+
+
+Configuring remote access on a SQL Server instance
+To enable remote connection on SQL Server right – click on the server and select the Properties option. In the Server Properties dialog under the Connections tab check the Allow remote connections to this server option:
+Go to Start->Programs->Microsoft SQL Server 2005/2008/2012 ->Configuration Tools and select the SQL Server Configuration Manager:
+Under the SQL Server Network Configuration select Protocols for <your server name>:
+Make sure that TCP/IP protocol is enabled and right click on TCP/IP and select the Properties option. In the TCP/IP Properties dialog select the IP Addresses tab and scroll down to IPAII. If the TCP Dynamic Ports dialog box contains 0, which indicates that the Database Engine is listening on dynamic ports, delete the 0 and set the TCP Dynamic Ports to blank and TCP Port to 1433. Port 1433 is the default instance that SQL Server uses:
+When you click the OK button you will be prompted with a message to restart the service:
+In the left pane of SQL Server Configuration Manager click SQL Server Services, right-click SQL Server<instance_name>, and click Restart:
+Configure a Windows Firewall for Database Engine Access
+
+89) How to troubleshoot if MSSQL remote connection is not working?
+90) How to add user in MSSQL and assign password?
+91) How to reset sa user password in MSSQL?
+https://manage.accuwebhosting.com/knowledgebase/2925/How-to-fix-an-error-change-password-failed-for-login-sa.html
+1]Follow these steps if Microsoft SQL Server instance is registered in Plesk.
+1.	Log in to Plesk.
+2.	Go to Tools & Settings > Database Servers.
+
+Click on a hostname of a Microsoft SQL Server instance, password for which you wish to change.
+Click Change Password.
+Specify a new password and click OK.
+2]
+Using Microsoft SQL Management Studio
+ 
+1.	Connect to a server via RDP.
+2.	Download and install SQL Server Management Studio on your Windows Server.
+3.	Once installed, start Microsoft SQL Management Studio. To do this, run the command below in a command prompt:
+C:> ssms.exe
+4.	Select Microsoft SQL Server instance for which you want to reset a password from the drop-down list and connect using Windows Authentication.
+In the Object Explorer, expand Security > Logins > right-click on sa to open its Properties.
+In the Properties window, set a new password for sa and click OK to apply the changes.
+92) How to check/repair database in MSSQL?
+1. Download and install the latest version of MS SQL Server Management Studio (SSMS).
+
+https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms
+
+2. After installation, open the application from Start > Programs > Microsoft SQL Server Tools <version>  > Microsoft SQL Server Management Studio <version>.
+
+3. Log into the database using Windows Authentication
+
+4. Expand Databases, then right-click on wt_sched and choose "Properties."
+
+5. Select "Options" and scroll to the bottom in the pane on the right.
+
+6. Change "Restrict Access" to "SINGLE_USER."
+
+7. Select OK and repeat the above steps for the wtMaster section of the database.
+
+8. Select "New Query" from the toolbar, and in the query pane that opens, paste in the following commands:
+
+dbcccheckdb('wtMaster',REPAIR_REBUILD)
+dbcccheckdb('wt_sched',REPAIR_REBUILD)
+   
+9. Select the "Execute" button to repair the database.
+   
+10. Perform the steps outlined in 4-6 above and change the databases back to "MULTI_USER" from "SINGLE_USER."
+
+
+93) What is Postgresql and use of Postgresql ?
+>>PostgreSQL is stable database management system and its used as the primary data store or data warehouse for many web, mobile, geospatial, and analytics applications.
+
+94) How to install Postgresql service?
+https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-centos-7
+>>yum install postgresqlpostgresql-server
+Start PostgreSQL so that we can add our admin user:
+/etc/init.d/postgresql start
+
+95) What is the path of Postgresql configuration files?
+>>/var/lib/pgsql/data/postgresql.conf
+
+96) How to check Postgresql error logs?
+>>/var/lib/pgsql/data/pg_log/
+
+97) How to restart/start/stop Postgresqlservice ?
+For windows :pg_ctl -D "C:\Program Files\PostgreSQL\9.6\data" start
+pg_ctl -D "C:\Program Files\PostgreSQL\9.6\data" stop
+pg_ctl -D "C:\Program Files\PostgreSQL\9.6\data" restart
+Linux:
+service postgresql start
+service postgresql stop
+service postgresql restart
+
+98) How to kill specific query in Postgresql ?
+>> Connect postgresql
+   Select * from pg_stat_activity where state = ‘active’;
+   To kill process>>
+    Select pg_camel_backend (<pid>)
+     Select pg_terminate_backend (<pid>)
+99) How to take backup and restore Postgresql database?
+pg_dumptecmintdb>tecmintdb.sql
+$ pgsql -f all_pg_dbs.sqlpostgres
+
+100) How to install Postgresql web client?
+
+101) How to secure Postgresql on server?
+
+102) How to check Postgresql service status?
+systemctl status postgresql
+service postgresql status 
+/etc/init.d/postgresql status 
+/sbin/service postgresql status
+
+103) How to troubleshoot if Postgresql service is down?
+104) How to enable remote connection for Postgresql?
+105) How to troubleshoot if Postgresql remote connection is not working?
+106) How to add user in Postgresql and assign password?
+>>check error logs
+tail /var/log/postgresql/postgresql-9.3-main.log 
+
+
+
+
+107) How to reet root user password in Postgresql?
+https://www.geeksforgeeks.org/postgresql-reset-password-for-postgres/
+systemctl restart postgresql
+
+108) How to check/repair database in Postgresql?
+
+109) What is MongoDB and use of MongoDB ?
+MongoDB is an open source NoSQL database management program. NoSQL is used as an alternative to traditional relational databases. NoSQL databases are quite useful for working with large sets of distributed data.
+110) How to install MongoDB service?
+CentOs :
+vi /etc/yum.repos.d/mongodb-org.repo
+add repos>>
+[mongodb-org-4.0]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.0/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-4.0.asc
+repo.mongodb.org
+Index of redhat
+sudo yum install mongodb-org
+sudosystemctl start mongod
+sudosystemctl enable mongod
+verfy mongo
+version verify
+db.version()
+
+111) What is the path of MongoDB configuration files?
+Linux Ubuntu:
+/etc/mongod.conf
+112) How to check MongoDB error logs?
+ /var/log/mongodb/mongodb.log
+113) How to restart/start/stop MongoDB service ?
+systemctl start mongod
+systemctlrestartmongod
+systemctlstopmongod
+
+
+114) How to kill specific query in MongoDB ?
+According to Mongo documentation, you should:
+1.	Obtain the current operation ID via db.currentOp()
+2.	Kill opp via db.killOp()
+
+115 How to take backup and restore MongoDB database?
+mongodump -h sample.mongodbhost.com:27017 -d DATABASE_NAME -u USER_NAME -p SAMPLE_PASSWORD -o ~/Desktop
+
+mongorestore--hostsample.mongohost.com--port 27017 --usernameUSER_NAME--passwordSAMPLE_PASSWORD--dbDATABASE_NAME .
+116) How to install MongoDB web client?
+117) How to secure MongoDB on server?
+118) How to check MongoDB service status?
+119) How to troubleshoot if MongoDB service is down?
+120) How to enable remote connection for MongoDB?
+121) How to troubleshoot if MongoDB remote connection is not working?
+122) How to add user in MongoDB and assign password?
+
+This answer is for Mongo 3.2.1 Reference
+Terminal 1:
+$ mongod --auth
+Terminal 2:
+db.createUser({user:"admin_name", pwd:"1234",roles:["readWrite","dbAdmin"]})
+if you want to add without roles (optional):
+db.createUser({user:"admin_name", pwd:"1234", roles:[]})
+
+123) How to reset admin user password in MongoDB?
+You can modify the MongoDB password using the following command at the shell prompt:
+mongo admin --username root --password YOURPASSWORD
+MongoDB shell version: 2.4.8
+connecting to: 127.0.0.1:27017/admin
+>db = db.getSiblingDB('admin')
+admin
+>db.changeUserPassword("root", "NEWPASSWORD")
+> exit
+
+124) How to check/repair database in MongoDB?
+If you do a repair operation as root user be sure that afterwards all db files are owned by the mongodb user, otherwise mongodb will not start
+chown -R mongodb:mongodb /data/db
+rm /data/db/mongod.lock
+/etc/init.d/mongodb start
+
+
+Control Panels:
+cPanel:
+
+125) What is cPanel and usage?
+cPanel is a web hosting control panel software developed by cPanel, LLC. It provides a graphical interface (GUI) and automation tools designed to simplify the process of hosting a web site to the website owner or the "end user". 
+126) How to check cpanel logs and its location?
+/usr/local/cpanel/logs
+127) What is the path of cPanel configuration files?
+ /var/cpanel/cpanel.config
+128) How to check cPanel service status?
+Service cpaneld status
+129) How to set cronjobs and check cron logs?
+Log in to cPanel, scroll down to the Advanced section and click the Cron Jobs icon.
+Scroll down to the Add New Cron Job section. You can either select from the Common Settings drop down menus or fill out your own custom values. Fill out the form as follows:
+•	Common Settings: This option allows you to select a preset interval for your cron job to run.
+If you have not chosen one of the preset Common Settings, choose from the other options:
+•	Minute: Either enter a custom value or select a preset value from the Common Settings menu.
+•	Hour: Either enter a custom value or select a preset value from the Common Settings menu.
+•	Day: Either enter a custom value or select a preset value from the Common Settings menu.
+•	Month: Either enter a custom value or select a preset value from the Common Settings menu.
+•	Weekday: Either enter a custom value or select a preset value from the Common Settings menu.
+•	Enter the command you want to run in the Command field and click Add New Cron Job.
+•	The command can be any command able to be run from the Linux terminal. This includes scripts per our example.
+
+
+tail -f /var/log/cron
+
+Plesk:
+
+130) What is Plesk and usage?
+Plesk is a web hosting platform with a control panel that allows the administrator to set up websites, reseller accounts, e-mail accounts, DNS, and databases through a web browser).
+131) How to check Plesk logs and its location?
+%plesk_dir%admin\logs\
+
+132) What is the path of Plesk configuration files?
+•	%plesk_dir%admin\conf\panel.ini
+
+
+133) How to check Plesk service status?
+From plesk service monitor
+
+134) How to set cronjobs and check cron logs?
+1.	
+2.	Log into Plesk.
+3.	Navigate to Domains > example.com > Scheduled tasks or Tools & Settings > Scheduled Tasks.
+4.	Click Add task and set specify Run parameter to Cron style.
+5.	Fill in the Run text field with cron-style time syntax, for example:
+* */4 * * *
+6.	Fill in the Command text field with the cron command, for example:
+/usr/bin/echo "my message"
+
+Logs :/var/www/vhosts/example.com/logs/
+
+
+DirectAdmin:
+
+135) What is DirectAdmin and usage?
+136) How to check DirectAdmin logs and its location?
+
+137) What is the path of DirectAdmin configuration files?
+/usr/local/directadmin/conf
+
+138) How to check DirectAdmin service status?
+Service directadmin status
+
+139) How to set cronjobs and check cron logs?
+
+CyberPanel: 
+
+140)What is CyberPanel and usage?
+DirectAdmin is a graphical web-based web hosting control panel allowing administration of websites through a web browser.
+141) How to check CyberPanel logs and its location?
+ /home/cyberpanel/error-logs. txt
+142) What is the path of CyberPanel configuration files?
+
+/usr/local/lsws/conf/httpd_config.conf
+143) How to check CyberPanel service status?
+systemctlstatuslscpd.
+Service lscp status
+144) How to set cronjobs and check cron logs?
+
+Websites:
+
+145)  How to find website’s error logs? 
+146) How to enable error logs on websites? Give example of Wordpress, laravel, CI, Magento.
+147)  Explain error codes 500, 502, 503, 403, 404 
+148) How to troubleshoot WP websites blank page issues?
+149) how to enable debug mode in WP websites?
+150) How to troubleshoot WP hacking issues?
+151) How to upgrade WP websites?
+152) How to check logs for Laravel/Codeignitor websites and their location?
+Laravel >> domain/storage/logs
+153) What is the configuration file for forLaravel/Codeignitor websites and its location?
+154) How to check database connection string for WP website?
+155) How to troubleshoot slow website loading speed issue?
+156) How to enable LiteSpeed caching for WordPress and non WordPress websites?
+157) How to Enable custom error logs for windows websites?
+158) How to reset WP admin password?
+159) How to check CPU &Resouces Usage of website?
+
+PHP
+160) What is PHP and use of it?
+161) How to install specific version of PHP?
+
+162) How to change PHP versions? Mention steps to change PHP version from cPanel, DA and Plesk
+163) How to install and check PHP extensions?
+164) How to change PHP settings like memory_limitetc. ?
+165) What is the path for PHP error logs of applications like WP, Laravel, Magento, CI?
+How to create PHPinfo file?
+How to change timezone in PHP?
+
+ASP .Net
+
+166) What is ASP .Net and use of it?
+ASP.NET is a free web framework for building great websites and web applications using HTML, CSS, and JavaScript.
+167) How to install specific version of ASP .Net?
+1.	Connect to a Plesk server via RDP.
+2.	Start Server Manager at Start menu > All Programs.
+3.	In Server Manager, click Manage > Add Roles and Features.
+4.	In Server Roles, expand Web Server (IIS) > Web Server > Application Development and select required components for installation:
+•	ASP.NET 3.5 and .NET Extensibility 3.5
+ASP.NET 4.6 and .NET Extensibility 4.7
+5.	In Features, select .NET Framework 3.5 Features / .NET Framework 4.7 Features:
+6.	Click Next and Install.
+7.	Once the installation is completed, in Plesk go to Tools & Settings > Server Components and click Refresh to detect ASP.NET 3.5 or ASP.NET 4.7.
+8.	Verify that ASP.NET 3.5 / ASP.NET 4.7 is shown in the components list under Web Scripting.
+9.	The installed ASP.NET versions will now appear for selection at Domains > example.com > Hosting Settings > Microsoft ASP.NET support.
+ 
+
+
+168) How to change ASP .Net versions? Mention steps to change ASP .Net version Plesk
+1.	Login To Plesk control panel.
+2.	Go to the Website & Domains.
+3.	Locate the name of the domain or subdomain you wish to change the ASP.NET version for.
+4.	Click ASP.NET Settings.
+Click on Change Version.
+Select ASP.NET framework version.
+Click OK.
+
+169) How to change application to run in 32bit mode?
+1.	Launch the IIS Manager by typing “internet information services” in the Windows search box and selecting the best match.
+2.	You will see your computer’s name in the left window, expand it and click on Application Pools.
+3.	In the right window, right-click on DefaultAppPools and selects Advanced Settings.
+4.	Select “Enable 32-bit Applications” and change it from False to True.
+5.	Click OK and restart your computer.
+
+170) How to change ASP .Net settings ?
+171) What is the path for ASP .Net error logs of applications?
+ASP.NET uses IIS logging, so it's really an IIS question. Though there is some detailed info in Event Viewer for some types of events. In IIS6 (and prior), this is located in %SystemRoot%\system32\logfiles , and in IIS7, this is located in %SystemDrive%\inetpub\logs\LogFiles
+172) What is NodeJS and use of it?
+Node.js is a platform built on Chrome's JavaScript runtime for easily building fast and scalable network applications.
+173) How to install specific version of NodeJS?
+>>To install particular node version using nvm, also installs nvm and npm
+curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+source ~/.bashrc
+nvm list-remote
+nvm install v12.14.1
+nvm list
+nvm use v12.14.1
+node --version
+174) How to change NodeJS versions? Mention steps to change NodeJS version from cPanel
+>>Cpanel>> Under software sections >> Setup NodeJS app>> select nodejs application >> select nodejs version from drop down section
+175) What is the path for NodeJS error logs of applications ?
+>>approot/stderr.log
+176) How to deploy NodeJS application from cPanel?
+1. Create application
+>>Cpanel>> Under software sections >> Setup NodeJS app >> create application to start application setup>> Fill in the applications details:
+Setup form
+NodeJS version
+Application mode
+Application root
+Application startup file
+Click on create .
+First, you must create an application. To do this, follow these steps:
+1.	Log in to cPanel
+Open the Node.js app tool:
+•	If you are using the Jupiter theme, on the Tools page, in the Software section, click Setup Node.js App.
+•	If you are using the Paper Lantern theme, in the SOFTWARE section, click Setup Node.js App.
+On the Node.js selector page, click CREATE APPLICATION to start the application setup:
+Fill in the fields on the application setup form:
+•	Node.js version - select your perferred version from the drop down list
+•	Application mode - choose Development or Production from the list. Development may be chosen initially and changed to production later.
+•	Application root - the file system location for application files. The entry will be appended to /home/username to form the complete path to the application files in the cPanel home directory.
+Application URL - the address of the application on the Internet
+o	Application startup file - the initial file that will be processed when launching the application.
+When the form is complete, click CREATE:
+The application starts automatically. To view a test page for the application, click OPEN:
+
+
+177) How to configure NodeJS Proxy in apache for a application?
+>. Vi /usr/local/apache/conf/httpd.conf
+Searche the domain name
+Uncomment # includeline
+Copy #include line 
+Include "/etc/apache2/conf.d/userdata/std/2_4/uhcmpbvi/carronrent.com
+mkdir -p /etc/apache2/conf.d/userdata/ssl/2_4/uhcmpbvi/carronrent.com/
+mkdir -p /etc/apache2/conf.d/userdata/std/2_4/uhcmpbvi/carronrent.com/
+cd /etc/apache2/conf.d/userdata/std/2_4/uhcmpbvi/carronrent.com/
+vi proxy.conf
+
+# This is for normal requests
+<Location /test/>
+ProxyPass http://127.0.0.1:port no/
+ProxyPassReverse http://127.0.0.1:Port no/
+</Location>
+save and exit file
+cd /etc/apache2/conf.d/userdata/ssl/2_4/uhcmpbvi/carronrent.com/
+vi proxy.conf
+
+SSLProxyEngine On
+ProxyPreserveHost On
+ProxyRequests Off
+# This is for normal requests
+<Location /test/>
+ProxyPass http://127.0.0.1:port no/
+ProxyPassReverse http://127.0.0.1:Port no/
+</Location>
+save and exit file
+Run the application.
+
+178) How to check NodeJS version from commandline ?
+node –v
+
+179) What is Python and use of it?
+Python is a computer programming language often used to build websites and software, automate tasks, and conduct data analysis.
+180) How to install specific version of Python?
+181) How to change Python versions? Mention steps to change Python version from cPanel
+Python versions and Setup of different Python versions (Cpanel)
+1.	Login to your Cpanel.
+2.	Under Software/Services area, choose Setup Python App. 
+3.	 From the Python version drop-down menu you can choose the exact version you wish.
+4.	From App Directory you can choose the exact name of the folder where you wish to configure the Python App, after you are done click on Setup and your specific Python version will be configured.
+
+182) What is the path for Python error logs of applications ?
+
+183) How to deploy Python application from cPanel?
+1.	1) Log in to cPanel. ...
+2.	4) Fill in the required fields on the application setup form.
+3.	5) After you are done, click “CREATE” to finish setting up the app.
+4.	6) Click Run Pip Install to install your app dependencies.
+5.	7) When everything is done, Save and RESTART your app.
+6.	That's a wrap!
+
+184) How to configure Python Proxy in apache for a application?
+
+185) How to check Python version from command line ?
+python -V
+
+186) What is shared hosting?
+Shared hosting allows multiple websites to utilize a single server. 
+187) What is Reseller hosting?
+Reseller hosting is a Web hosting business model in which a Web hosting provider allows some or all of their Web hosting services to be sold by an individual or third party organization.
+
+189) What is VPS hosting?
+VPS (Virtual Private Server) is a hosting service that uses virtualization technology to provide you with dedicated (private) resources on a server with multiple users.
+190: What is dedicated server hosting?
+Dedicated server hosting essentially means that your website has its own server all to itself. 
+191) Explain Difference between  Shared/VPS/Dedicated servers.
+192) List Type of Virtualization platforms that we use. 
+Launchpad,HyperV,AWS,DO
+Port numbers
+DNS 53
+FTP 21/22
+
+SSH  22
+HTTP 80
+HTTPS 443
+POP3 110
+POP3S 995
+IMAP 143
+IMAPS 993
+SMTP 25,587
+SMTPS 26
+WebDav
+WebDavS
+Cpanel ports 2083 / 2082
+WHM 2086/2087
+Webmail on cPanel 2095/ 2096
+Mysql/MSSQL/Postgresql/MongoDB
+SFTP 22
+FTP passive ports
+DirectAdmin 2222
+Cyberpanel 8090
+Webuzo 2005/2004
+NRPE 5666
+Webdisk 2078
