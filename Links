@@ -1,0 +1,10 @@
+https://www.tutorialspoint.com/How-to-install-a-Python-Module
+https://docs.bitnami.com/installer/infrastructure/nodejs/configuration/install-modules/
+https://forums.cpanel.net/resources/installation-and-configuration-of-ea-tomcat85.637/
+https://university.plesk.com/
+https://itsfoss.com/apt-remove-purge/
+https://www.section.io/engineering-education/laravel-beginners-guide-blogpost/
+
+<Files *.php>
+ForceType application/x-httpd-php74
+</Files>
